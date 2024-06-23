@@ -1,6 +1,7 @@
 require("Point")
 require("util")
 require("Gems")
+require("View")
 
 Model = {
     width = 10,
@@ -17,6 +18,7 @@ function Model:new()
     local obj = {}
     setmetatable(obj, self)
     self.__index = self
+    self.view = View:new(self)
     self:init()
     return obj
 end
@@ -55,18 +57,23 @@ function Model:checkMatch(pos, dx, dy)
     row[1] = pos
     local bottom_y = pos.y
 
-    local pos1 = pos:copy()
+    local specials = {}
 
+    local pos1 = pos:copy()
     local continue = true
     while continue do
         pos1.x = pos1.x + dx
         pos1.y = pos1.y + dy
-        if pos1.x >= self.width or pos1.y >= self.height or self.field[pos1.y][pos1.x] ~= gem then
+        local gem2 = self.field[pos1.y][pos1.x]
+        if pos1.x >= self.width or pos1.y >= self.height or not gem2:equals(gem) then
             continue = false
         else
             row[#row+1] = pos1:copy()
             if pos1.y > bottom_y then
                 bottom_y = pos1.y
+            end
+            if gem2.specials ~= nil then
+                specials[#specials+1] = gem2.specials
             end
         end
     end
@@ -76,10 +83,18 @@ function Model:checkMatch(pos, dx, dy)
     while continue do
         pos2.x = pos2.x - dx
         pos2.y = pos2.y - dy
-        if pos2.x < 0 or pos2.y < 0 or self.field[pos2.y][pos2.x] ~= gem then
+        if pos2.x < 0 or pos2.y < 0 then
             continue = false
         else
-            row[#row+1] = pos2:copy()
+            local gem2 = self.field[pos2.y][pos2.x]
+            if gem2:equals(gem) then
+                row[#row+1] = pos2:copy()
+                if gem2.specials ~= nil then
+                    specials[#specials+1] = gem2.specials
+                end
+            else
+                continue = false
+            end
         end
     end
 
@@ -99,6 +114,14 @@ function Model:checkMatch(pos, dx, dy)
             for _, cell in ipairs(row) do
                 self:drop(cell)
             end
+        end
+
+        if gem.special ~= nil then
+            specials[#specials+1] = gem.special
+        end
+
+        for _, special in ipairs(specials) do
+            special()
         end
     end
 end
@@ -134,36 +157,7 @@ function Model:tick()
 end
 
 function Model:dump()
-    os.execute("cls")
-    local str = "  "
-    for x = 0, self.width-1, 1 do
-        str = str..x.." "
-    end
-    str = str.."\n"
-    for y = 0, self.height-1, 1 do
-        str = str..y.." "
-        for x = 0, self.width-1, 1 do
-            str = str..(self.field[y][x].char).." "
-        end
-        str = str.."\n"
-    end
-    print(str)
-end
-
-function Model:dumpMoves()
-    local str = "  "
-    for x = 0, self.width-1, 1 do
-        str = str..x.." "
-    end
-    str = str.."\n"
-    for y = 0, self.height-1, 1 do
-        str = str..y.." "
-        for x = 0, self.width-1, 1 do
-            str = str..(self.moves[y][x]).." "
-        end
-        str = str.."\n"
-    end
-    print(str)
+    self.view:dump()
 end
 
 function Model:initMoves()
@@ -257,7 +251,7 @@ function Model:testForPossibleMatch(x0, y0, x, y)
             local match = true
             for j = 0, 2, 1 do
                 local xx = x + i + j
-                if xx >= self.width or (y0 == y and xx == x0) or (i+j~=0 and row[xx] ~= gem) then
+                if xx >= self.width or (y0 == y and xx == x0) or (i+j~=0 and not row[xx]:equals(gem)) then
                     match = false
                     break
                 end
@@ -279,7 +273,7 @@ function Model:testForPossibleMatch(x0, y0, x, y)
             local match = true
             for j = 0, 2, 1 do
                 local yy = y + i + j
-                if yy >= self.height or (x0 == x and yy == y0) or (i+j ~= 0 and self.field[yy][x] ~= gem) then
+                if yy >= self.height or (x0 == x and yy == y0) or (i+j ~= 0 and not self.field[yy][x]:equals(gem)) then
                     match = false
                     break
                 end

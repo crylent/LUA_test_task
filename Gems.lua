@@ -1,8 +1,9 @@
 Gem = {}
 
-function Gem:new(char)
+function Gem:new(char, special)
     local obj = {}
     obj.char = char
+    obj.special = special
     setmetatable(obj, self)
     self.__index = self
     return obj
@@ -23,6 +24,10 @@ function Gem.rand(forbidden)
     end
 
     return table.rand(allowed)
+end
+
+function Gem:equals(other)
+    return self.char == other.char
 end
 
 Gems = {
