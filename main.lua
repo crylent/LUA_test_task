@@ -3,7 +3,8 @@ require("Point")
 
 local model = Model:new()
 model:dump()
-while true do
+local quit = false
+while not quit do
     local cmd_is_correct = false
     while not cmd_is_correct do
         io.write("\016 ")
@@ -12,7 +13,10 @@ while true do
             cmd[#cmd+1] = token
         end
 
-        if #cmd == 4 and cmd[1] == "m" then
+        if #cmd >= 1 and cmd[1] == "q" then
+            quit = true
+            cmd_is_correct = true
+        elseif #cmd >= 4 and cmd[1] == "m" then
             local x, y = tonumber(cmd[2]), tonumber(cmd[3])
             if x >= 0 and x < model.width and y >= 0 and y < model.height then
                 local from = Point:new(x, y)
