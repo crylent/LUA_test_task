@@ -22,7 +22,7 @@ function Gem.rand(forbidden)
         end
     end
 
-    return allowed[math.random(1, #allowed)]
+    return table.rand(allowed)
 end
 
 Gems = {

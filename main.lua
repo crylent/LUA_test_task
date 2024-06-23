@@ -4,7 +4,6 @@ require("Point")
 local model = Model:new()
 model:dump()
 while true do
-    --model:dump()
     local cmd_is_correct = false
     while not cmd_is_correct do
         io.write("\016 ")
@@ -40,5 +39,4 @@ while true do
             io.write("\027[A\027[2K")
         end
     end
-    --os.execute("cls")
 end

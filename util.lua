@@ -14,7 +14,6 @@ end
 
 function table.addUnique(t, item)
     if table.contains(t, item) then
-        print("contains")
         return
     end
     t[#t+1] = item
@@ -32,4 +31,8 @@ function table.copy(t)
         copy[i] = val
     end
     return copy
+end
+
+function table.rand(t)
+    return t[math.random(1, #t)]
 end
