@@ -11,7 +11,9 @@ Model = {
     affected_cells = {},
     all_affected_cells = {},
     moves = {},
-    possible_moves_counter = 0
+    possible_moves_counter = 0,
+
+    score = 0
 }
 
 function Model:new()
@@ -64,16 +66,20 @@ function Model:checkMatch(pos, dx, dy)
     while continue do
         pos1.x = pos1.x + dx
         pos1.y = pos1.y + dy
-        local gem2 = self.field[pos1.y][pos1.x]
-        if pos1.x >= self.width or pos1.y >= self.height or not gem2:equals(gem) then
+        if pos1.x >= self.width or pos1.y >= self.height then
             continue = false
         else
-            row[#row+1] = pos1:copy()
-            if pos1.y > bottom_y then
-                bottom_y = pos1.y
-            end
-            if gem2.specials ~= nil then
-                specials[#specials+1] = gem2.specials
+            local gem2 = self.field[pos1.y][pos1.x]
+            if gem2:equals(gem) then
+                row[#row+1] = pos1:copy()
+                if pos1.y > bottom_y then
+                    bottom_y = pos1.y
+                end
+                if gem2.specials ~= nil then
+                    specials[#specials+1] = gem2.specials
+                end
+            else
+                continue = false
             end
         end
     end
@@ -99,6 +105,8 @@ function Model:checkMatch(pos, dx, dy)
     end
 
     if #row >= 3 then
+        self.score = self.score + #row
+
         for _, cell in ipairs(row) do
             self.field[cell.y][cell.x] = Gems.temp
         end
@@ -157,6 +165,7 @@ function Model:tick()
 end
 
 function Model:dump()
+    self.view.score = self.score
     self.view:dump()
 end
 

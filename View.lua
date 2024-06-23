@@ -4,6 +4,7 @@ function View:new(model)
     local obj = {}
     obj.model = model
     setmetatable(obj, self)
+    self.score = 0
     self.__index = self
     return obj
 end
@@ -22,5 +23,6 @@ function View:dump()
         end
         str = str.."\n"
     end
+    str = str.."\nScore: "..self.score
     print(str)
 end
