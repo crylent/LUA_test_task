@@ -33,7 +33,10 @@ while not quit do
                     to = Point:new(x, y + 1)
                 end
 
-                if to ~= nil then
+                if to ~= nil
+                    and to.x >= 0 and to.x < model.width
+                    and to.y >= 0 and to.y < model.height
+                then
                     cmd_is_correct = true
                     model:move(from, to)
                 end
