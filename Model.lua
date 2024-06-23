@@ -1,10 +1,10 @@
 require("Point")
 require("util")
+require("Gems")
 
 Model = {
     width = 10,
     height = 10,
-    gems = { "A", "B", "C", "D", "E", "F" },
 
     field = {},
     affected_cells = {}
@@ -16,23 +16,6 @@ function Model:new()
     self.__index = self
     self:init()
     return obj
-end
-
-function Model:rand(forbidden)
-    local allowed = {}
-    for _, val in ipairs(self.gems) do
-        local allowed_val = true
-        for _, fval in ipairs(forbidden) do
-            if val == fval then
-                allowed_val = false
-            end
-        end
-        if allowed_val then
-            allowed[#allowed+1] = val
-        end
-    end
-
-    return allowed[math.random(1, #allowed)]
 end
 
 function Model:init()
@@ -47,7 +30,7 @@ function Model:init()
             if y >= 2 and self.field[y-1][x] == self.field[y-2][x] then
                 forbidden[#forbidden+1] = self.field[y-1][x]
             end
-            row[x] = self:rand(forbidden)
+            row[x] = Gem.rand(forbidden)
         end
         self.field[y] = row
     end
@@ -96,7 +79,7 @@ function Model:checkMatch(pos, dx, dy)
 
     if #row >= 3 then
         for _, cell in ipairs(row) do
-            self.field[cell.y][cell.x] = "*"
+            self.field[cell.y][cell.x] = Gems.temp
         end
         self:dump()
         Sleep(0.5)
@@ -121,7 +104,7 @@ function Model:drop(origin)
         table.addUnique(self.affected_cells, Point:new(x, y))
     end
     table.addUnique(self.affected_cells, Point:new(x, 0))
-    self.field[0][x] = self:rand({})
+    self.field[0][x] = Gem.rand({})
     self:dump()
     Sleep(0.2)
 end
@@ -141,9 +124,7 @@ function Model:tick()
 end
 
 function Model:dump()
-    --_ = io.read("l")
     os.execute("cls")
-    --print(#self.affected_cells)
     local str = "  "
     for x = 0, self.width-1, 1 do
         str = str..x.." "
@@ -152,7 +133,7 @@ function Model:dump()
     for y = 0, self.height-1, 1 do
         str = str..y.." "
         for x = 0, self.width-1, 1 do
-            str = str..self.field[y][x].." "
+            str = str..(self.field[y][x].char).." "
         end
         str = str.."\n"
     end
